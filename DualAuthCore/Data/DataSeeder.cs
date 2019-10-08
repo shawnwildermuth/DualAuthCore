@@ -11,9 +11,9 @@ namespace DualAuthCore.Data
   public class DataSeeder
   {
     private readonly DualAuthContext _ctx;
-    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly UserManager<IdentityUser> _userManager;
 
-    public DataSeeder(DualAuthContext ctx, UserManager<ApplicationUser> userManager)
+    public DataSeeder(DualAuthContext ctx, UserManager<IdentityUser> userManager)
     {
       _ctx = ctx;
       _userManager = userManager;
@@ -26,7 +26,7 @@ namespace DualAuthCore.Data
       if (!_ctx.Users.Any())
       {
 
-        var user = new ApplicationUser()
+        var user = new IdentityUser()
         {
           Email = "bob@aol.com",
           UserName = "bob@aol.com"

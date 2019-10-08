@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using DualAuthCore.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace DualAuthCore.Data
 {
-    public class DualAuthContext : IdentityDbContext<ApplicationUser>
+    public class DualAuthContext : IdentityDbContext<IdentityUser>
     {
         public DualAuthContext(DbContextOptions<DualAuthContext> options)
             : base(options)

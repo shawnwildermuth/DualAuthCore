@@ -13,6 +13,7 @@ using DualAuthCore.Models;
 using DualAuthCore.Services;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Hosting;
 
 namespace DualAuthCore
 {
@@ -33,9 +34,9 @@ namespace DualAuthCore
 
       services.AddTransient<DataSeeder>();
 
-      services.AddIdentity<ApplicationUser, IdentityRole>()
-          .AddEntityFrameworkStores<DualAuthContext>()
-          .AddDefaultTokenProviders();
+      services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+          .AddEntityFrameworkStores<DualAuthContext>();
+
 
       // Enable Dual Authentication 
       services.AddAuthentication()
@@ -44,7 +45,7 @@ namespace DualAuthCore
         {
           cfg.RequireHttpsMetadata = false;
           cfg.SaveToken = true;
-          
+
           cfg.TokenValidationParameters = new TokenValidationParameters()
           {
             ValidIssuer = Configuration["Tokens:Issuer"],
@@ -57,16 +58,17 @@ namespace DualAuthCore
       // Add application services.
       services.AddTransient<IEmailSender, EmailSender>();
 
-      services.AddMvc();
+      services.AddControllersWithViews();
+      services.AddRazorPages();
+
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    public void Configure(IApplicationBuilder app, IHostingEnvironment env, DataSeeder seeder)
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DataSeeder seeder)
     {
       if (env.IsDevelopment())
       {
         app.UseDeveloperExceptionPage();
-        app.UseBrowserLink();
         app.UseDatabaseErrorPage();
       }
       else
@@ -76,13 +78,15 @@ namespace DualAuthCore
 
       app.UseStaticFiles();
 
-      app.UseAuthentication();
+      app.UseRouting();
 
-      app.UseMvc(routes =>
+      app.UseAuthentication();
+      app.UseAuthorization();
+
+      app.UseEndpoints(endpoints =>
       {
-        routes.MapRoute(
-                  name: "default",
-                  template: "{controller=Home}/{action=Index}/{id?}");
+        endpoints.MapDefaultControllerRoute();
+        endpoints.MapRazorPages();
       });
 
       seeder.SeedAsync().Wait();
