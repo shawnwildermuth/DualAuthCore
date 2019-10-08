@@ -1,0 +1,15 @@
+## Generate a token
+
+POST http://localhost:5000/Account/GenerateToken HTTP/1.1
+content-type: application/json
+
+{
+    Email: "EMAIL", 
+    Password: "PASSWORD"
+}
+
+
+## Request data with token
+
+GET http://localhost:5000/api/customers HTTP/1.1
+Authorization: Bearer TOKEN_FROM_ABOVE
