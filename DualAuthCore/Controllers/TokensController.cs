@@ -23,20 +23,17 @@ namespace DualAuthCore.Controllers
   {
     private readonly UserManager<IdentityUser> _userManager;
     private readonly SignInManager<IdentityUser> _signInManager;
-    private readonly IEmailSender _emailSender;
     private readonly ILogger _logger;
     private readonly IConfiguration _config;
 
     public TokensController(
         UserManager<IdentityUser> userManager,
         SignInManager<IdentityUser> signInManager,
-        IEmailSender emailSender,
         ILogger<TokensController> logger,
         IConfiguration config)
     {
       _userManager = userManager;
       _signInManager = signInManager;
-      _emailSender = emailSender;
       _logger = logger;
       _config = config;
     }
@@ -46,10 +43,16 @@ namespace DualAuthCore.Controllers
 
     [AllowAnonymous]
     [HttpPost]
-    public async Task<IActionResult> GenerateToken([FromBody] LoginViewModel model)
+    public async Task<IActionResult> GenerateToken([FromBody] TokenRequestViewModel model)
     {
-      if (ModelState.IsValid)
+
+      if (true) //ModelState.IsValid)
       {
+        model = new TokenRequestViewModel()
+        {
+          Email = "bob@aol.com",
+          Password = "P@ssw0rd!"
+        };
         var user = await _userManager.FindByEmailAsync(model.Email);
 
         if (user != null)
@@ -82,28 +85,5 @@ namespace DualAuthCore.Controllers
     }
 
 
-    #region Helpers
-
-    private void AddErrors(IdentityResult result)
-    {
-      foreach (var error in result.Errors)
-      {
-        ModelState.AddModelError(string.Empty, error.Description);
-      }
-    }
-
-    private IActionResult RedirectToLocal(string returnUrl)
-    {
-      if (Url.IsLocalUrl(returnUrl))
-      {
-        return Redirect(returnUrl);
-      }
-      else
-      {
-        return RedirectToAction(nameof(HomeController.Index), "Home");
-      }
-    }
-
-    #endregion
   }
 }

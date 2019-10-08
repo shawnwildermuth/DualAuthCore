@@ -14,6 +14,7 @@ using DualAuthCore.Services;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Hosting;
+using System.Text.Json;
 
 namespace DualAuthCore
 {
@@ -58,7 +59,13 @@ namespace DualAuthCore
       // Add application services.
       services.AddTransient<IEmailSender, EmailSender>();
 
-      services.AddControllersWithViews();
+      services.AddControllersWithViews().AddJsonOptions(json =>
+      {
+        json.JsonSerializerOptions.AllowTrailingCommas = true;
+        json.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+        json.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        json.JsonSerializerOptions.WriteIndented = true;
+      });
       services.AddRazorPages();
 
     }

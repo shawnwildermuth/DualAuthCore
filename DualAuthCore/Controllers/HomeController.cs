@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using DualAuthCore.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DualAuthCore.Controllers
 {
@@ -23,6 +24,7 @@ namespace DualAuthCore.Controllers
       return View();
     }
 
+    [Authorize]
     public IActionResult Privacy()
     {
       return View();

@@ -1,15 +1,16 @@
 ## Generate a token
 
-POST http://localhost:5000/Account/GenerateToken HTTP/1.1
+POST http://localhost:5000/Tokens/GenerateToken HTTP/1.1
 content-type: application/json
 
-{
-    Email: "EMAIL", 
-    Password: "PASSWORD"
-}
+{ email: "bob@aol.com", password: "P@ssw0rd!" }
+
 
 
 ## Request data with token
 
 GET http://localhost:5000/api/customers HTTP/1.1
-Authorization: Bearer TOKEN_FROM_ABOVE
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJib2JAYW9sLmNvbSIsImp0aSI6ImMyZTQwMWQ0LWQxZGYtNDZmMy1hN2RjLWU1YTkwYzgyYzA0MiIsImV4cCI6MTU3MzEwNzE0MCwiaXNzIjoiaHR0cDovL215Y29kZWNhbXAuaW8iLCJhdWQiOiJodHRwOi8vbXljb2RlY2FtcC5pbyJ9.MOj6pgqtJ9tm-B6oljPsui7xF1Y7-KqiiAg6CD0J6EE
+
+GET http://localhost:5000/Home/Privacy HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJib2JAYW9sLmNvbSIsImp0aSI6ImMyZTQwMWQ0LWQxZGYtNDZmMy1hN2RjLWU1YTkwYzgyYzA0MiIsImV4cCI6MTU3MzEwNzE0MCwiaXNzIjoiaHR0cDovL215Y29kZWNhbXAuaW8iLCJhdWQiOiJodHRwOi8vbXljb2RlY2FtcC5pbyJ9.MOj6pgqtJ9tm-B6oljPsui7xF1Y7-KqiiAg6CD0J6EE
