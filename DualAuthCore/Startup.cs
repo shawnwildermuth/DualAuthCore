@@ -16,76 +16,91 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace DualAuthCore
 {
-  public class Startup
-  {
-    public Startup(IConfiguration configuration)
+    public class Startup
     {
-      Configuration = configuration;
-    }
-
-    public IConfiguration Configuration { get; }
-
-    // This method gets called by the runtime. Use this method to add services to the container.
-    public void ConfigureServices(IServiceCollection services)
-    {
-      services.AddDbContext<DualAuthContext>(options =>
-          options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-
-      services.AddTransient<DataSeeder>();
-
-      services.AddIdentity<ApplicationUser, IdentityRole>()
-          .AddEntityFrameworkStores<DualAuthContext>()
-          .AddDefaultTokenProviders();
-
-      // Enable Dual Authentication 
-      services.AddAuthentication()
-        .AddCookie(cfg => cfg.SlidingExpiration = true)
-        .AddJwtBearer(cfg =>
+        public Startup(IConfiguration configuration)
         {
-          cfg.RequireHttpsMetadata = false;
-          cfg.SaveToken = true;
-          
-          cfg.TokenValidationParameters = new TokenValidationParameters()
-          {
-            ValidIssuer = Configuration["Tokens:Issuer"],
-            ValidAudience = Configuration["Tokens:Issuer"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Tokens:Key"]))
-          };
+            Configuration = configuration;
+        }
 
-        });
+        public IConfiguration Configuration { get; }
 
-      // Add application services.
-      services.AddTransient<IEmailSender, EmailSender>();
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
+#if NETCORE30
+            services.AddControllersWithViews();
+#endif
 
-      services.AddMvc();
+            services.AddDbContext<DualAuthContext>(options => 
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddTransient<DataSeeder>();
+
+            services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<DualAuthContext>()
+                .AddDefaultTokenProviders();
+
+            // Enable Dual Authentication 
+            services.AddAuthentication()
+              .AddCookie(cfg => cfg.SlidingExpiration = true)
+              .AddJwtBearer(cfg =>
+              {
+                  cfg.RequireHttpsMetadata = false;
+                  cfg.SaveToken = true;
+
+                  cfg.TokenValidationParameters = new TokenValidationParameters()
+                  {
+                      ValidIssuer = Configuration["Tokens:Issuer"],
+                      ValidAudience = Configuration["Tokens:Issuer"],
+                      IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Tokens:Key"]))
+                  };
+
+              });
+
+            // Add application services.
+            services.AddTransient<IEmailSender, EmailSender>();
+
+            services.AddMvc();
+        }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, DataSeeder seeder)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                app.UseBrowserLink();
+                app.UseDatabaseErrorPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+            }
+
+            app.UseStaticFiles();
+
+            app.UseAuthentication();
+#if NETCORE30
+            app.UseAuthorization();
+#endif
+
+#if NETCORE30
+            app.UseRouting();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
+            });
+#elif NETCORE20
+            app.UseMvc(routes =>
+            {
+                routes.MapRoute(
+                          name: "default",
+                          template: "{controller=Home}/{action=Index}/{id?}");
+            });
+#endif
+
+            seeder.SeedAsync().Wait();
+        }
     }
-
-    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    public void Configure(IApplicationBuilder app, IHostingEnvironment env, DataSeeder seeder)
-    {
-      if (env.IsDevelopment())
-      {
-        app.UseDeveloperExceptionPage();
-        app.UseBrowserLink();
-        app.UseDatabaseErrorPage();
-      }
-      else
-      {
-        app.UseExceptionHandler("/Home/Error");
-      }
-
-      app.UseStaticFiles();
-
-      app.UseAuthentication();
-
-      app.UseMvc(routes =>
-      {
-        routes.MapRoute(
-                  name: "default",
-                  template: "{controller=Home}/{action=Index}/{id?}");
-      });
-
-      seeder.SeedAsync().Wait();
-    }
-  }
 }
