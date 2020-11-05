@@ -13,6 +13,7 @@ using DualAuthCore.Models;
 using DualAuthCore.Services;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Hosting;
 
 namespace DualAuthCore
 {
@@ -57,17 +58,16 @@ namespace DualAuthCore
       // Add application services.
       services.AddTransient<IEmailSender, EmailSender>();
 
-      services.AddMvc();
+      services.AddControllersWithViews();
+      services.AddRazorPages();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    public void Configure(IApplicationBuilder app, IHostingEnvironment env, DataSeeder seeder)
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DataSeeder seeder)
     {
       if (env.IsDevelopment())
       {
         app.UseDeveloperExceptionPage();
-        app.UseBrowserLink();
-        app.UseDatabaseErrorPage();
       }
       else
       {
@@ -76,13 +76,15 @@ namespace DualAuthCore
 
       app.UseStaticFiles();
 
-      app.UseAuthentication();
+      app.UseRouting();
 
-      app.UseMvc(routes =>
+      app.UseAuthentication();
+      app.UseAuthorization();
+
+      app.UseEndpoints(c =>
       {
-        routes.MapRoute(
-                  name: "default",
-                  template: "{controller=Home}/{action=Index}/{id?}");
+        c.MapRazorPages();
+        c.MapDefaultControllerRoute();
       });
 
       seeder.SeedAsync().Wait();
